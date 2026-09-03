@@ -149,6 +149,83 @@
     white-space: nowrap;
   }
 
+  .archive {
+    margin-top: 32px;
+  }
+
+  .archive-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .archive-title {
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .archive-hint {
+    font-size: 0.74rem;
+    color: var(--ink-soft);
+  }
+
+  .archive-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .archive-status {
+    padding: 16px;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+  }
+
+  .archive-item {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px 16px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    text-decoration: none;
+    color: var(--ink);
+    transition: border-left-width 0.15s ease, background 0.15s ease;
+  }
+
+  .archive-item:hover,
+  .archive-item:focus-visible {
+    border-left-width: 6px;
+    background: var(--bg-soft);
+  }
+
+  .archive-item:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+
+  .archive-name {
+    font-size: 0.92rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .archive-size {
+    flex: none;
+    font-size: 0.74rem;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
   .footer {
     margin-top: 32px;
     font-size: 0.74rem;
@@ -194,16 +271,72 @@
       </span>
     </a>
 
-    <a class="link-card" href="https://drive.google.com/drive/folders/1m6THqz_7Y8VZ983gY2fWGQakm5Br18Ls?usp=sharing" target="_blank" rel="noopener">
-      <span class="link-text">
-        <span class="name">자료실</span>
-        <span class="desc">Google Drive</span>
-      </span>
-    </a>
+  </div>
+
+  <div class="archive">
+    <div class="archive-head">
+      <span class="archive-title">자료실</span>
+      <span class="archive-hint">클릭하면 바로 다운로드됩니다</span>
+    </div>
+    <div class="archive-list" id="archive-list">
+      <div class="archive-status">불러오는 중…</div>
+    </div>
   </div>
 
   <div class="footer">클릭하면 새 탭에서 독립적으로 열립니다</div>
 </div>
+
+<script>
+  const DRIVE_FOLDER_ID = '1m6THqz_7Y8VZ983gY2fWGQakm5Br18Ls';
+  const DRIVE_API_KEY = 'AIzaSyDgBmawKbZCfYYNMoXg2eTtpbaWcR0uy2M';
+
+  function formatSize(bytes) {
+    if (!bytes) return '';
+    const n = Number(bytes);
+    if (n < 1024) return n + ' B';
+    if (n < 1024 * 1024) return (n / 1024).toFixed(1) + ' KB';
+    return (n / (1024 * 1024)).toFixed(1) + ' MB';
+  }
+
+  async function loadArchive() {
+    const list = document.getElementById('archive-list');
+    const url = `https://www.googleapis.com/drive/v3/files?q='${DRIVE_FOLDER_ID}'+in+parents+and+trashed=false&key=${DRIVE_API_KEY}&fields=files(id,name,size,mimeType)&orderBy=name`;
+
+    try {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('drive api error ' + res.status);
+      const data = await res.json();
+      const files = data.files || [];
+
+      if (files.length === 0) {
+        list.innerHTML = '<div class="archive-status">자료실이 비어 있습니다</div>';
+        return;
+      }
+
+      list.innerHTML = '';
+      files.forEach(file => {
+        const isGoogleDoc = file.mimeType.startsWith('application/vnd.google-apps');
+        const href = isGoogleDoc
+          ? `https://drive.google.com/open?id=${file.id}`
+          : `https://drive.google.com/uc?export=download&id=${file.id}`;
+
+        const item = document.createElement('a');
+        item.className = 'archive-item';
+        item.href = href;
+        if (!isGoogleDoc) item.setAttribute('download', file.name);
+        item.innerHTML = `
+          <span class="archive-name">${file.name}</span>
+          <span class="archive-size">${formatSize(file.size)}</span>
+        `;
+        list.appendChild(item);
+      });
+    } catch (err) {
+      list.innerHTML = '<div class="archive-status">목록을 불러오지 못했습니다</div>';
+    }
+  }
+
+  loadArchive();
+</script>
 
 </body>
 </html>
