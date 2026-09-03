@@ -171,6 +171,38 @@
     color: var(--ink-soft);
   }
 
+  .refresh-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    margin-left: auto;
+    padding: 5px 10px;
+    background: transparent;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    color: var(--ink-soft);
+    font-family: inherit;
+    font-size: 0.74rem;
+    cursor: pointer;
+    transition: border-color 0.15s ease, color 0.15s ease;
+  }
+
+  .refresh-btn:hover,
+  .refresh-btn:focus-visible {
+    border-color: var(--accent);
+    color: var(--ink);
+  }
+
+  .refresh-btn svg {
+    width: 13px;
+    height: 13px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+  }
+
   .archive-list {
     display: flex;
     flex-direction: column;
@@ -276,6 +308,10 @@
   <div class="archive">
     <div class="archive-head">
       <span class="archive-title">자료실</span>
+      <button class="refresh-btn" onclick="location.reload()" aria-label="새로고침" type="button">
+        <svg viewBox="0 0 24 24"><path d="M20 11a8 8 0 1 0-2.34 5.66"/><path d="M20 5v6h-6"/></svg>
+        새로고침
+      </button>
       <span class="archive-hint">클릭하면 바로 다운로드됩니다</span>
     </div>
     <div class="archive-list">
