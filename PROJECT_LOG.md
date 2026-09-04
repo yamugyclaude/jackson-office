@@ -45,3 +45,24 @@
 
 ### 다음 세션에서 참고
 - 위 "자료실 동기화 절차" 참고해서 "드라이브와 동기화해" 요청 시 그대로 수행
+
+## 2026-09-04 (2) [완료] 사이트 비밀번호 보호 + 자료실 동기화
+### 배경
+- 자료실 폴더가 전체공개라, 개인정보 포함 파일(이력서)을 올리면 누구나 다운로드 가능한 문제 발견
+- 해결책으로 사이트 자체에 로그인 보호를 걸기로 결정
+
+### 작업 내용
+- jackson-office를 **Vercel로 이전** + `middleware.js`로 Basic Auth 구현 (무료 요금제라 Vercel 정식 비밀번호 보호 기능은 못 씀)
+- **새 주소**: https://yamugyclaude-jackson-office.vercel.app/ (아이디 `jackson` / 비번 `278727`)
+- 기존 GitHub Pages 주소(`yamugyclaude.github.io/jackson-office`)는 사장님이 직접 Settings → Pages → Source "None"으로 껐음 (Claude의 GitHub 도구엔 Pages 설정 변경 기능이 없어서 대신 못 함) → 지금은 404, 완전히 죽음
+- 사이트가 보호되므로 자료실에 **김희정2026이력서.xlsx** 추가 완료 (main 배포됨)
+
+### 배운 것 / 주의
+- **Claude의 GitHub MCP 도구는 파일 생성/수정/삭제, PR, 이슈만 가능하고 저장소 Settings(Pages on/off 등)는 건드릴 수 없음.** 이 부분을 요청받으면 미리 "안 됨"을 밝히고 사장님께 직접 안내할 것 — 해보고 나서 안 된다고 하면 신뢰 문제가 생김.
+- Vercel 무료(hobby) 요금제는 정식 비밀번호 보호(Deployment Protection) 미지원 → middleware.js로 직접 구현해야 함.
+- Vercel 프로젝트를 API로 새로 만들 때 git 연결이 API로는 잘 안 되는 경우가 있었음 — 이땐 사장님이 vercel.com/new에서 직접 Import하는 게 확실함.
+
+### 현재 상태
+- 사이트: https://yamugyclaude-jackson-office.vercel.app/ (비번 보호, 정상)
+- 저장소: yamugyclaude/jackson-office main 브랜치, Vercel과 git 연결되어 push하면 자동 배포됨
+- 자료실 폴더(`1m6THqz_7Y8VZ983gY2fWGQakm5Br18Ls`) 파일 3개 전부 사이트에 반영 완료 (office_utility_01.zip, WING 매뉴얼, 이력서)
