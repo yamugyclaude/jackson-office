@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HWPX → PDF 변환</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=Noto+Sans+KR:wght@400;500;700&display=swap');
+
+  :root {
+    --bg: #f4f0e8;
+    --ink: #26221d;
+    --ink-soft: #6b6255;
+    --line: #ddd3bf;
+    --card: #fdfbf6;
+    --accent: #a86a2a;
+    --accent-ink: #ffffff;
+    --shadow: rgba(38, 34, 29, 0.08);
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #1b1815;
+      --ink: #ece5d6;
+      --ink-soft: #a89a85;
+      --line: #38322a;
+      --card: #24201b;
+      --accent: #d9a355;
+      --accent-ink: #221a0d;
+      --shadow: rgba(0, 0, 0, 0.35);
+    }
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'Noto Sans KR', -apple-system, sans-serif;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 48px 24px;
+  }
+
+  .plate { width: 100%; max-width: 480px; }
+
+  h1 {
+    font-family: 'Black Han Sans', 'Noto Sans KR', sans-serif;
+    font-weight: 400;
+    font-size: 1.8rem;
+    margin: 0 0 24px;
+  }
+
+  .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 24px;
+    box-shadow: 0 1px 2px var(--shadow);
+  }
+
+  input[type="file"] {
+    width: 100%;
+    margin-bottom: 16px;
+    color: var(--ink);
+  }
+
+  button {
+    width: 100%;
+    padding: 12px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: none;
+    border-radius: 6px;
+    font-size: 1rem;
+    font-family: inherit;
+    cursor: pointer;
+  }
+
+  button:disabled { opacity: 0.6; cursor: default; }
+
+  #status {
+    margin-top: 14px;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    min-height: 1.2em;
+  }
+
+  .back {
+    display: block;
+    margin-top: 20px;
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    text-decoration: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="plate">
+  <h1>HWPX → PDF 변환</h1>
+  <div class="card">
+    <input type="file" id="file" accept=".hwpx">
+    <button id="convertBtn">변환해서 다운로드</button>
+    <div id="status"></div>
+  </div>
+  <a class="back" href="/">← 잭슨사무실로</a>
+</div>
+
+<script>
+document.getElementById('convertBtn').addEventListener('click', async () => {
+  const input = document.getElementById('file');
+  const statusEl = document.getElementById('status');
+  const btn = document.getElementById('convertBtn');
+
+  if (!input.files.length) {
+    statusEl.textContent = '파일을 먼저 선택하세요.';
+    return;
+  }
+
+  const file = input.files[0];
+  btn.disabled = true;
+  statusEl.textContent = '변환 중...';
+
+  try {
+    const res = await fetch('/api/convert', { method: 'POST', body: file });
+    if (!res.ok) {
+      statusEl.textContent = await res.text();
+      return;
+    }
+    const blob = await res.blob();
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = file.name.replace(/\.hwpx$/i, '.pdf');
+    a.click();
+    URL.revokeObjectURL(url);
+    statusEl.textContent = '완료! 다운로드됐습니다.';
+  } catch (err) {
+    statusEl.textContent = '오류: ' + err.message;
+  } finally {
+    btn.disabled = false;
+  }
+});
+</script>
+
+</body>
+</html>
